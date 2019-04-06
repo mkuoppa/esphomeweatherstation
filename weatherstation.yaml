@@ -40,12 +40,12 @@ sensor:
       falling_edge: INCREMENT
     internal_filter: 50us
     update_interval: 60s
-    #rotations = pulses/2
-    #circ_m=0.09*2*3.14
-    #mps = 1.18*circ_m*rotations
-    #mps = 1.18*0,0005652/2=0,02000808
+    #rotations_per_sec = pulses/2/60
+    #circ_m=0.09*2*3.14 = 0.5652
+    #mps = 1.18*circ_m*rotations_per_sec  
+    #mps = 1.18*0.5652/2/60 =0,0055578
     filters:
-      - multiply: 0.02
+      - multiply: 0.0055578
       
   - platform: pulse_counter
     pin: 
