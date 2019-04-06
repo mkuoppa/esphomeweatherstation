@@ -6,3 +6,5 @@ ESP8266 programmeed using https://esphome.io
 - Wind gauge (m/s)
 - Rain gauge (mm rain per minute, mm rain daily)
 - Temperature sensor (degC)
+
+![](images/fullsizeoutput_2f49.jpeg)
