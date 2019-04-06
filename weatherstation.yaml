@@ -1,0 +1,86 @@
+esphome:
+  name: alfons
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: <wifi>
+  password: <password>
+
+  manual_ip:
+    static_ip: 192.168.1.231    
+    gateway: 192.168.1.1
+    subnet: 255.255.0.0
+
+api:
+  password: <apipasswd>
+  
+ota:
+  safe_mode: True
+  password: <otapasswd>
+  
+logger:
+
+dallas:
+    # pin D7
+  - pin: GPIO13
+
+sensor:
+  - platform: pulse_counter
+    pin: 
+      # pin D5
+      number: GPIO14
+      mode: INPUT_PULLUP
+    unit_of_measurement: 'm/s'
+    name: 'Wind sensor'
+    icon: 'mdi:weather-windy'
+    id: my_wind
+    count_mode:
+      rising_edge: DISABLE
+      falling_edge: INCREMENT
+    internal_filter: 50us
+    update_interval: 60s
+    #rotations = pulses/2
+    #circ_m=0.09*2*3.14
+    #mps = 1.18*circ_m*rotations
+    #mps = 1.18*0,0005652/2=0,02000808
+    filters:
+      - multiply: 0.02
+      
+  - platform: pulse_counter
+    pin: 
+      # pin D6
+      number: GPIO12
+      mode: INPUT_PULLUP
+    unit_of_measurement: 'mm'
+    name: 'Rain gauge'
+    icon: 'mdi:weather-rainy'
+    id: my_rain
+    count_mode:
+      rising_edge: DISABLE
+      falling_edge: INCREMENT
+    internal_filter: 50us
+    update_interval: 60s
+    #buckets = pulses
+    #mm_per_bucket=0.2794
+    #rain = buckets*0.2794
+    filters:
+      - multiply: 0.2794
+
+  - platform: total_daily_energy
+    name: "Total Daily Rain"
+    power_id: my_rain
+    unit_of_measurement: 'mm'
+    icon: 'mdi:weather-rainy'
+    # x60 To convert to aggregated rain amount
+    filters:
+      - multiply: 60
+    
+  - platform: dallas
+    address: 0x750517B15C1CFF28
+    name: 'Temperature air'
+
+# Enable time component to reset energy at midnight
+time:
+  - platform: sntp
+    id: my_time
