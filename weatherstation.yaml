@@ -73,6 +73,7 @@ sensor:
   - platform: integration
     name: "Total Daily Rain"
     sensor: my_rain
+    unit_of_measurement: 'mm'
     id: my_total_rain
     time_unit: h
     icon: 'mdi:weather-rainy'
