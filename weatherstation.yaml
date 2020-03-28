@@ -46,6 +46,9 @@ sensor:
     #mps = 1.18*0.5652/2/60 =0,0055578
     filters:
       - multiply: 0.0055578
+      - sliding_window_moving_average:
+          window_size: 2
+          send_every: 1
       
   - platform: pulse_counter
     pin: 
@@ -67,12 +70,13 @@ sensor:
     filters:
       - multiply: 0.2794
 
-  - platform: total_daily_energy
+  - platform: integration
     name: "Total Daily Rain"
-    power_id: my_rain
-    unit_of_measurement: 'mm'
+    sensor: my_rain
+    id: my_total_rain
+    time_unit: h
     icon: 'mdi:weather-rainy'
-    # x60 To convert to aggregated rain amount
+    # x60 To convert to aggregated rain amount (was 60)
     filters:
       - multiply: 60
     
@@ -82,5 +86,13 @@ sensor:
 
 # Enable time component to reset energy at midnight
 time:
-  - platform: sntp
-    id: my_time
+#  - platform: sntp
+#    id: my_time
+  - platform: homeassistant
+    id: homeassistant_time
+    on_time:
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        then:
+          - sensor.integration.reset: my_total_rain
