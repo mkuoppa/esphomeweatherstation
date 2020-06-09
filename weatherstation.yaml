@@ -7,11 +7,15 @@ wifi:
   ssid: <wifi>
   password: <password>
 
-  manual_ip:
-    static_ip: 192.168.1.231    
-    gateway: 192.168.1.1
-    subnet: 255.255.0.0
+ap:
+  ssid: "Fallback Hotspot"
+  password: "xyz"
 
+captive_portal:
+
+web_server:
+  port: 80
+  
 api:
   password: <apipasswd>
   
