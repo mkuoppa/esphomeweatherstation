@@ -44,14 +44,32 @@ sensor:
       falling_edge: INCREMENT
     internal_filter: 50us
     update_interval: 60s
+    on_raw_value:
+      then:
+        - sensor.template.publish:
+            id: template_sens
+            state: !lambda "return x;"
     #rotations_per_sec = pulses/2/60
     #circ_m=0.09*2*3.14 = 0.5652
     #mps = 1.18*circ_m*rotations_per_sec  
     #mps = 1.18*0.5652/2/60 =0,0055578
+    accuracy_decimals: 2
     filters:
       - multiply: 0.0055578
       - sliding_window_moving_average:
           window_size: 2
+          send_every: 1
+          #send_first_at: 60 # can be used to prevent an unrealistic high value at startup (cannot be larger than send_every)
+
+  - platform: template
+    name: "Template Sensor"
+    id: template_sens
+    filters:
+#      - multiply: 0.2794
+#      - multiply: 60 (to get mm/h)
+      - multiply: 16.764
+      - sliding_window_moving_average:
+          window_size: 60
           send_every: 1
       
   - platform: pulse_counter
@@ -59,7 +77,7 @@ sensor:
       # pin D6
       number: GPIO12
       mode: INPUT_PULLUP
-    unit_of_measurement: 'mm'
+    unit_of_measurement: 'mm/h'
     name: 'Rain gauge'
     icon: 'mdi:weather-rainy'
     id: my_rain
@@ -72,22 +90,46 @@ sensor:
     #mm_per_bucket=0.2794
     #rain = buckets*0.2794
     filters:
-      - multiply: 0.2794
+#      - multiply: 0.2794
+#      - multiply: 60 (to get mm/h)
+      - multiply: 16.764
+      - sliding_window_moving_average:
+          window_size: 60
+          send_every: 1
 
   - platform: integration
     name: "Total Daily Rain"
-    sensor: my_rain
     unit_of_measurement: 'mm'
+    sensor: my_rain
     id: my_total_rain
     time_unit: h
     icon: 'mdi:weather-rainy'
-    # x60 To convert to aggregated rain amount (was 60)
-    filters:
-      - multiply: 60
-    
+    accuracy_decimals: 2
+#    # x60 To convert to aggregated rain amount (was 60)
+#.   # not needed if mm/h is the input
+#    filters:
+#      - multiply: 60
+
   - platform: dallas
     address: 0x750517B15C1CFF28
     name: 'Temperature air'
+
+binary_sensor:
+  - platform: template
+    device_class: moisture
+    # rain detector
+    name: "Rain detector"
+    id: my_rain_detector
+    filters:
+      - delayed_off: 10min  #wait 10min without rain before setting to off
+    lambda: |-
+      if (id(my_rain).state > 0.1) {
+        //it is raining
+        return true;
+      } else {
+        // no rain
+        return false;
+      }
 
 # Enable time component to reset energy at midnight
 time:
